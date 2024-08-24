@@ -10,7 +10,7 @@ const stringSession = new StringSession(''); // fill this later with your saved 
 async function fetchChannelMessages(link) {
     const client = new TelegramClient(stringSession, apiId, apiHash, { connectionRetries: 5 });
     await client.start({
-        phoneNumber: "+919339388730",
+        phoneNumber: "+917001693312",
         password: async () => await input.text('Password?'),
         phoneCode: async () => await input.text('Code?'),
         onError: (err) => console.log(err),

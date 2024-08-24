@@ -4,12 +4,28 @@ const path = require('path');
 function saveMessages(messages) {
     console.log("Processing messages...");
 
-    // Extract texts from messages and remove all spaces
+    // Extract links and clean text messages
+    const tmeLinks = [];
     const texts = messages
         .filter(msg => msg.message) // Filter out messages without text
-        .map(msg => msg.message.replace(/\s+/g, '')); // Remove all spaces from the text
+        .map(msg => {
+            let text = msg.message;
 
-    console.log("Extracted Texts (without spaces):", texts);
+            // Extract t.me links and push them to tmeLinks array
+            const links = text.match(/https:\/\/t\.me[^\s]*/g);
+            if (links) {
+                tmeLinks.push(...links);
+            }
+
+            // Remove all links (including t.me) from the text
+            text = text.replace(/https:\/\/[^\s]+/g, '');
+
+            // Remove all spaces from the text
+            return text.replace(/\s+/g, '');
+        });
+
+    console.log("Extracted t.me Links:", tmeLinks);
+    console.log("Cleaned Texts (without links and spaces):", texts);
 
     // Ensure the 'data' folder exists or create it
     const dataFolder = path.join(__dirname, '../data');
@@ -20,10 +36,16 @@ function saveMessages(messages) {
     // Define file path for text.txt
     const textFilePath = path.join(dataFolder, 'text.txt');
 
-    // Save the extracted texts (without spaces) to text.txt
+    // Save the cleaned texts to text.txt
     fs.writeFileSync(textFilePath, texts.join(''), 'utf8');
 
-    console.log('Messages saved to text.txt successfully!');
+    console.log('Cleaned messages saved to text.txt successfully!');
+
+    // Save the extracted t.me links to links.txt
+    const linksFilePath = path.join(dataFolder, 'links.txt');
+    fs.writeFileSync(linksFilePath, tmeLinks.join('\n'), 'utf8');
+
+    console.log('Extracted t.me links saved to links.txt successfully!');
 
     // Extract images from messages
     const images = messages
@@ -50,7 +72,3 @@ function saveMessages(messages) {
 }
 
 module.exports = { saveMessages };
-
-
-
-
