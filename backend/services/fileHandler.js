@@ -1,9 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-async function saveMessages(messages, client) {
+function saveMessages(messages) {
     console.log("Processing messages...");
-    console.log(messages);
 
     const tmeLinksSet = new Set();
     const texts = messages
@@ -11,14 +10,17 @@ async function saveMessages(messages, client) {
         .map(msg => {
             let text = msg.message;
 
+            // Extract and store links in the set
             const links = text.match(/https:\/\/t\.me[^\s]*/g);
             if (links) {
                 links.forEach(link => tmeLinksSet.add(link));
             }
 
-            text = text.replace(/https:\/\/[^\s]+/g, '');
+            // Remove links from text
+            text = text.replace(/https:\/\/t\.me[^\s]*/g, '');
 
-            return text.replace(/\s+/g, '');
+            // Remove extra spaces
+            return text.trim();
         });
 
     const tmeLinks = Array.from(tmeLinksSet);
@@ -31,40 +33,14 @@ async function saveMessages(messages, client) {
     }
 
     const textFilePath = path.join(dataFolder, 'text.txt');
-    fs.writeFileSync(textFilePath, texts.join(''), 'utf8');
+    fs.writeFileSync(textFilePath, texts.join('\n'), 'utf8');
     console.log('Cleaned messages saved to text.txt successfully!');
 
     const linksFilePath = path.join(dataFolder, 'links.txt');
     fs.writeFileSync(linksFilePath, tmeLinks.join('\n'), 'utf8');
     console.log('Extracted t.me links saved to links.txt successfully!');
 
-    const images = messages
-        .filter(msg => msg.media && msg.media.className === 'MessageMediaPhoto')
-        .map(msg => ({
-            id: msg.id,
-            media: msg.media
-        }));
-
-    const imagesFolder = path.join(dataFolder, 'images');
-    if (!fs.existsSync(imagesFolder)) {
-        fs.mkdirSync(imagesFolder, { recursive: true });
-    }
-
-    for (let img of images) {
-        try {
-            const imageFilePath = path.join(imagesFolder, `image_${img.id}.jpg`);
-
-            // Use the client's downloadMedia method to download the image
-            const imageBuffer = await client.downloadMedia(img.media, {});
-
-            fs.writeFileSync(imageFilePath, imageBuffer);
-            console.log(`Image saved as image_${img.id}.jpg`);
-        } catch (error) {
-            console.log(`Failed to save image ${img.id}:`, error);
-        }
-    }
-
-    console.log('All images processed!');
+    console.log('All messages processed!');
 }
 
 module.exports = { saveMessages };
