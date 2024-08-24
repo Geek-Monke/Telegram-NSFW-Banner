@@ -6,6 +6,7 @@ import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
 import { db } from "@/firebase/config";
 import { getDocs, query, where, collection, addDoc, updateDoc, doc } from "firebase/firestore";
+import axios from 'axios';
 
 // Function to check if the link matches the Telegram format
 const isTelegramLinkValid = (link) => {
@@ -40,7 +41,7 @@ function Homepage() {
 
       //api request to backend
       const response = await axios.post('http://localhost:8080/api/check', { link });
-            setResults(response.data);
+      setResults(response.data);
 
       // Increment the user's points by 1
       const userRef = doc(db, 'users', userDetails.id);

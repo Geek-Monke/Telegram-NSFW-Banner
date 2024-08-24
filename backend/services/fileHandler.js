@@ -16,8 +16,10 @@ function saveMessages(messages) {
             }
 
             text = text.replace(/https:\/\/[^\s]*/g, '');
+            const cleanedText = text.replace(/^\s*[\r\n]/gm, '')
+            return cleanedText
 
-            return text.replace(/\s+/g, '');
+            // return text.replace(/\s+/g, '');
         });
 
     const tmeLinks = Array.from(tmeLinksSet);
