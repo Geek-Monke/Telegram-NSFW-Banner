@@ -9,7 +9,7 @@ router.post('/check', async (req, res) => {
         const { link } = req.body;
 
         const messages = await fetchChannelMessages(link);
-        console.log("Fetched Messages:", messages);
+        // console.log("Fetched Messages:", messages);
 
         saveMessages(messages);
 
