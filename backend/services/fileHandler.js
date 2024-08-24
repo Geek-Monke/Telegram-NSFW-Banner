@@ -10,17 +10,14 @@ function saveMessages(messages) {
         .map(msg => {
             let text = msg.message;
 
-            // Extract and store links in the set
             const links = text.match(/https:\/\/t\.me[^\s]*/g);
             if (links) {
                 links.forEach(link => tmeLinksSet.add(link));
             }
 
-            // Remove links from text
-            text = text.replace(/https:\/\/t\.me[^\s]*/g, '');
+            text = text.replace(/https:\/\/[^\s]*/g, '');
 
-            // Remove extra spaces
-            return text.trim();
+            return text.replace(/\s+/g, '');
         });
 
     const tmeLinks = Array.from(tmeLinksSet);

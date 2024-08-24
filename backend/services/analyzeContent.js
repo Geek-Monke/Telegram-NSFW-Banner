@@ -1,46 +1,46 @@
-// analyzeContent.js
-
+const fs = require('fs');
+const path = require('path');
 const language = require('@google-cloud/language');
 
-// Creates a client for the Natural Language API
 const languageClient = new language.LanguageServiceClient();
 
-// Custom list of keywords indicative of explicit content
-const explicitKeywords = [
-    "Pervy Dad", "Steals College Cutie", "Onlyfans", "🔞", "Download Links", "Watch Online", "👀",
-    "Premium", "January 7, 2024", "BellaBlu", "MickBlue", "https://1024terabox.com"
-];
+process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(__dirname, '../notional-fusion-428301-s9-bfc944d1eb09.json');
+
+
+async function getExplicitKeywords() {
+    try {
+        const filePath = path.join(__dirname, '../data/text.txt');
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        return fileContent;
+    } catch (error) {
+        console.error('Error reading explicit keywords file:', error);
+        throw error;
+    }
+}
 
 async function analyzeTextForExplicitContent(text) {
     try {
-        // Custom keyword detection
-        const lowerCaseText = text.toLowerCase();
-        const keywordFound = explicitKeywords.some(keyword =>
-            lowerCaseText.includes(keyword.toLowerCase())
-        );
+        // Get the content from text.txt
+        const explicitKeywordsText = await getExplicitKeywords();
 
-        if (keywordFound) {
-            console.log('Explicit content detected based on custom keywords.');
-            return true;
-        }
-
-        // Google Cloud Natural Language API - Classifies the text into categories
+        // Use the content from text.txt for analysis
         const document = {
-            content: text,
+            content: explicitKeywordsText,
             type: 'PLAIN_TEXT',
         };
 
         const [classificationResult] = await languageClient.classifyText({ document });
         const categories = classificationResult.categories;
 
-        console.log('Categories:');
-        categories.forEach(category => console.log(`Name: ${category.name}, Confidence: ${category.confidence}`));
+        console.log('Detected Categories:');
+        categories.forEach(category =>
+            console.log(`Name: ${category.name}, Confidence: ${category.confidence}`)
+        );
 
-        // Check for explicit content or related categories
         const explicitCategories = categories.filter(category =>
-            category.name.includes('Adult') ||
-            category.name.includes('Scam') ||
-            category.name.includes('Illegal')
+            category.name.toLowerCase().includes('adult') ||
+            category.name.toLowerCase().includes('scam') ||
+            category.name.toLowerCase().includes('illegal')
         );
 
         if (explicitCategories.length > 0) {
@@ -56,28 +56,13 @@ async function analyzeTextForExplicitContent(text) {
     }
 }
 
+analyzeTextForExplicitContent()
+
 // Example usage
-(async () => {
-    const text = `https://1024terabox.com/s/1dHyV70g6MuMyjR7sZOfYgA
-    https://1024terabox.com/s/17dTMafLReIO0DQKrhhPyWg
-    📥 𝐃𝐨𝐰𝐧𝐥𝐨𝐚𝐝 𝐋𝐢𝐧𝐤𝐬/👀𝐖𝐚𝐭𝐜𝐡 𝐎𝐧𝐥𝐢𝐧𝐞
-
-    Video 1. 👉 https://1024terabox.com/s/17d4z63hnxjYON2TYNu0nGQ
-    ‼️NEW‼️
-    https://1024terabox.com/s/1dn2JBiCv4pyASNOEZEIbSw
-    [ 😈 𝗣𝗿𝗲𝗺𝗶𝘂𝗺 𝗢𝗻𝗹𝘆𝗳𝗮𝗻𝘀  🔞]
-    https://1024terabox.com/s/1dn2JBiCv4pyASNOEZEIbSw
-    January 7, 2024
-    Pervy Dad Steals College Cutie
-    #BellaBlu, #MickBlue
-    =➖=➖=➖=➖=➖=➖=➖=➖=
-    [📥 𝐃𝐨𝐰𝐧𝐥𝐨𝐚𝐝 X 𝐖𝐚𝐭𝐜𝐡 𝐎𝐧𝐥𝐢𝐧𝐞 📺]
-
-    =➖=➖=➖=➖=➖=➖=➖=➖=
-    🔰 𝗝𝗼𝗶𝗻 𝗨ŝ 𝗢ɴ 𝗧𝗲𝗹𝗲𝗴𝗿𝗮𝗺 🔞`;
-
-    const isExplicit = await analyzeTextForExplicitContent(text);
-    console.log('Is Explicit:', isExplicit);
-})();
+// (async () => {
+//     const text = `Your example text here...`;
+//     const isExplicit = await analyzeTextForExplicitContent(text);
+//     console.log('Is Explicit:', isExplicit);
+// })();
 
 module.exports = { analyzeTextForExplicitContent };

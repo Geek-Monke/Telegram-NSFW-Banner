@@ -6,12 +6,12 @@ const { analyzeText, analyzeImages } = require('../services/analyzeContent');
 
 router.post('/check', async (req, res) => {
     try {
-        const { link } = req.body;
+        // const { link } = req.body;
 
-        const messages = await fetchChannelMessages(link);
+        // const messages = await fetchChannelMessages(link);
         // console.log("Fetched Messages:", messages);
 
-        saveMessages(messages);
+        // saveMessages(messages);
 
         // Analyze texts and images for explicit content
         const explicitTexts = await analyzeText(texts);
