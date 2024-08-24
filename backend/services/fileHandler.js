@@ -4,17 +4,17 @@ const path = require('path');
 function saveMessages(messages) {
     console.log("Processing messages...");
 
-    // Extract links and clean text messages
-    const tmeLinks = [];
+    // Use a Set to store unique t.me links
+    const tmeLinksSet = new Set();
     const texts = messages
         .filter(msg => msg.message) // Filter out messages without text
         .map(msg => {
             let text = msg.message;
 
-            // Extract t.me links and push them to tmeLinks array
+            // Extract t.me links and add them to the Set
             const links = text.match(/https:\/\/t\.me[^\s]*/g);
             if (links) {
-                tmeLinks.push(...links);
+                links.forEach(link => tmeLinksSet.add(link));
             }
 
             // Remove all links (including t.me) from the text
@@ -24,6 +24,8 @@ function saveMessages(messages) {
             return text.replace(/\s+/g, '');
         });
 
+    // Convert the Set to an Array
+    const tmeLinks = Array.from(tmeLinksSet);
     console.log("Extracted t.me Links:", tmeLinks);
     console.log("Cleaned Texts (without links and spaces):", texts);
 
@@ -72,3 +74,4 @@ function saveMessages(messages) {
 }
 
 module.exports = { saveMessages };
+
