@@ -29,7 +29,7 @@ const removeEmojisAndSpecialChars = (text) => {
         .replace(/[\n\r]/g, ' ')                // Replace newlines with spaces
         .replace(/\s+/g, ' ')                   // Replace multiple spaces with a single space
         .trim()                                      // Remove leading and trailing space
-        .slice(0, 200);
+        .slice(0, 300);
 };
 
 
@@ -67,7 +67,7 @@ function analyzeText() {
         });
 }
 
-analyzeText();
+
 
 // async function analyzeImageForExplicitContent(imagePath) {
 //     try {
@@ -119,4 +119,4 @@ analyzeText();
 //     console.log('Is Explicit:', isExplicit);
 // })();
 
-// module.exports = { analyzeTextForExplicitContent };
+module.exports = { analyzeText };
