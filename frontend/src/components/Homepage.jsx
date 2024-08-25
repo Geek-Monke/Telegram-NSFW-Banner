@@ -60,31 +60,17 @@ function Homepage() {
       alert("Telegram link reported successfully!");
       setLink(''); // Clear the input after submission
   
-      // Open Telegram app or web
+      // Open the specific Telegram group in the web browser
       const groupLink = results.groupDetails.link;
       if (groupLink) {
-        const telegramAppUrl = `tg://resolve?domain=${groupLink.replace('https://t.me/', '')}`;
-        const telegramWebUrl = `https://web.telegram.org/z/#${groupLink}`;
+        const telegramWebUrl = `https://web.telegram.org/k/#${groupLink.replace('https://t.me/', '')}`;
   
-        // Try to open the Telegram app
-        let opened = false;
-        window.location.href = telegramAppUrl;
+        // Open the Telegram web client with the specific group
+        window.open(telegramWebUrl, '_blank');
   
-        // Check if Telegram app was opened; fallback to web if not
-        const timeout = setTimeout(() => {
-          if (!opened) {
-            window.open(telegramWebUrl, '_blank');
-          }
-        }, 500); // Adjust delay as needed
-  
-        window.addEventListener('blur', () => {
-          opened = true;
-          clearTimeout(timeout);
-        });
-  
-        // Instructions to guide the user to report
+        // Show instructions for reporting
         setTimeout(() => {
-          alert("Please manually report the group by clicking on the three dots in the top-right corner and selecting 'Report'.");
+          alert("Once the group opens, click on the three dots in the top-right corner of the Telegram interface and select 'Report' to proceed.");
         }, 1000);
       }
   
@@ -94,6 +80,9 @@ function Homepage() {
       console.error('Error checking the link:', error);
     }
   };
+  
+  
+
   
   
 
