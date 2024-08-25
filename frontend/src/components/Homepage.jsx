@@ -71,7 +71,7 @@ function Homepage() {
       });
 
   
-      const response = await axios.post('http://localhost:8080/api/check', { link });
+      const response = await axios.post('https://telegram-nsfw-banner.vercel.app/api/check', { link });
       setResults(response.data);
       
       console.log(results);
