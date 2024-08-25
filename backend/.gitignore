@@ -1,3 +1,5 @@
 node_modules
 .env
 notional-fusion-428301-s9-bfc944d1eb09.json
+const.py
+config.ini
