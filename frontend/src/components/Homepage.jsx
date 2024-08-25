@@ -61,9 +61,9 @@ function Homepage() {
       setLink(''); // Clear the input after submission
   
       // Open the specific Telegram group in the web browser
-      const groupLink = results.groupDetails.link;
+      const groupLink = results?.groupDetails?.link;
       if (groupLink) {
-        const telegramWebUrl = `https://web.telegram.org/k/#${groupLink.replace('https://t.me/', '')}`;
+        const telegramWebUrl = groupLink;
   
         // Open the Telegram web client with the specific group
         window.open(telegramWebUrl, '_blank');
