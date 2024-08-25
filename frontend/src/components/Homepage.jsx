@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { db } from "@/firebase/config";
 import { getDocs, query, where, collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import axios from 'axios';
+import { obfuscatePortion } from 'text-obfuscation'; // Import the text-obfuscation library
 
 // Function to check if the link matches the Telegram format
 const isTelegramLinkValid = (link) => {
@@ -16,10 +17,14 @@ const isTelegramLinkValid = (link) => {
 
 function Homepage() {
   const [userDetails, setUserDetails] = useState(null);
-  const [results, setResults] = useState('')
+  const [results, setResults] = useState('');
   const [link, setLink] = useState('');
   const router = useRouter();
 
+  const obfuscator = obfuscatePortion({
+    keepAtStart: Number.MAX_VALUE,
+    atLeastFromEnd: 10,
+  });
   // Function to save the Telegram link to the database and update user points
   const saveLinkToDatabase = async () => {
     try {
@@ -57,16 +62,31 @@ function Homepage() {
         points: prevDetails.points + 1,
       }));
 
+
+      alert("Telegram link reported successfully!");
+      setLink(''); // Clear the input after submission
+
+      // Open the specific Telegram group in the web browser
+      const groupLink = results?.groupDetails?.link;
+      if (groupLink) {
+        const telegramWebUrl = groupLink;
+
+        // Open the Telegram web client with the specific group
+        window.open(telegramWebUrl, '_blank');
+
+        // Show instructions for reporting
+        setTimeout(() => {
+          alert("Once the group opens, click on the three dots in the top-right corner of the Telegram interface and select 'Report' to proceed.");
+        }, 1000);
+      }
+
+
     } catch (error) {
       console.error("Error saving link to database:", error);
       alert("Failed to report the Telegram link.");
       console.error('Error checking the link:', error);
     }
   };
-
-
-
-
 
 
   // Function to get current user details from the database
@@ -158,14 +178,14 @@ function Homepage() {
               <Button onClick={saveLinkToDatabase}>Check</Button>
             </div>
 
-            {results &&
+            {results ?
               <div className='flex w-full justify-between items-center px-5'>
                 <div className='flex flex-col gap-4'>
-                  <p>{results?.groupDetails?.name}</p>
-                  <p>{results?.groupDetails?.link}</p>
+                  <p>{obfuscator(results?.groupDetails?.name)}</p>
+                  <p>{obfuscator(results?.groupDetails?.link)}</p>
                 </div>
                 <Button onClick={handleReport} className='bg-red-600'>Report</Button>
-              </div>}
+              </div> : <h1>No offensive content found</h1>}}
           </div>
         </div>
       </div>
