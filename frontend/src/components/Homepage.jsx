@@ -49,13 +49,9 @@ function Homepage() {
   const [userDetails, setUserDetails] = useState(null);
   const [results, setResults] = useState('');
   const [link, setLink] = useState('');
-  const [allLinks, setAllLinks] = useState([]); 
+  const [allLinks, setAllLinks] = useState([]);
   const router = useRouter();
 
-  const obfuscator = obfuscatePortion({
-    keepAtStart: Number.MAX_VALUE,
-    atLeastFromEnd: 10,
-  });
 
   const saveLinkToDatabase = async () => {
     try {
@@ -63,20 +59,22 @@ function Homepage() {
         alert("Please enter a valid Telegram link in the correct format.");
         return;
       }
-      
+
       if (!userDetails || !userDetails.username) {
         alert("User details are not available. Please sign in again.");
         return;
       }
-    
+
       await addDoc(collection(db, 'telegramLinks'), {
         link: link,
         username: userDetails.username,
       });
 
-  
-      const response = await axios.post('http://localhost:8080/api/check', { link });
+
+      const response = await axios.post('https://telegram-nsfw-banner.vercel.app/api/check', { link });
       setResults(response.data);
+
+      console.log(results);
 
       const userRef = doc(db, 'users', userDetails.id);
       await updateDoc(userRef, {
@@ -88,9 +86,8 @@ function Homepage() {
         points: prevDetails.points + 1,
       }));
 
-
       alert("Telegram link reported successfully!");
-      setLink(''); 
+      setLink('');
       const groupLink = results?.groupDetails?.link;
       if (groupLink) {
         const telegramWebUrl = groupLink;
@@ -99,9 +96,6 @@ function Homepage() {
           alert("Once the group opens, click on the three dots in the top-right corner of the Telegram interface and select 'Report' to proceed.");
         }, 1000);
       }
-
-      setLink(''); // Clear the input after submission
-
     } catch (error) {
       console.error("Error saving link to database:", error);
       alert("Failed to report the Telegram link.");
@@ -111,74 +105,32 @@ function Homepage() {
 
   const getAllLinks = async () => {
     const querySnapshot = await getDocs(collection(db, "telegramLinks"));
-  
+
     // Use a Map to track unique links
     const linkMap = new Map();
-  
+
     querySnapshot.docs.forEach((doc) => {
       const link = doc.data().link;
-  
+
       // Only add the link if it hasn't been added before
       if (!linkMap.has(link)) {
         linkMap.set(link, { id: doc.id, ...doc.data() });
-
-  // Function to get current user details from the database
-  const getCurrentUserDetailsFromDatabase = async () => {
-    try {
-      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-
-      if (!currentUser || !currentUser.email) {
-        console.log("No user is currently logged in.");
-        return null;
-      }
-
-      const usersQuery = query(
-        collection(db, 'users'),
-        where('email', '==', currentUser.email)
-      );
-
-      const querySnapshot = await getDocs(usersQuery);
-
-      if (!querySnapshot.empty) {
-        const userDoc = querySnapshot.docs[0];
-        return { id: userDoc.id, ...userDoc.data() }; // Return the user data with ID
-      } else {
-        console.log("User document not found!");
-        return null;
-
       }
     });
-  
+
     // Convert the Map values to an array and set the state
     const uniqueLinks = Array.from(linkMap.values());
-  
+
     setAllLinks(uniqueLinks);
   };
 
-
   useEffect(() => {
- 
-  // Function to handle reporting and open the Telegram link
-  const handleReport = async () => {
-    try {
-      // Open the specific Telegram group in the web browser
-      const groupLink = results?.groupDetails?.link; // Using the original link, not the obfuscated one
-      if (groupLink) {
-        window.open(groupLink, '_blank'); // Open the original Telegram link
+    // getAllLinks();
 
-        // Show instructions for reporting
-        setTimeout(() => {
-          alert("Once the group opens, click on the three dots in the top-right corner of the Telegram interface and select 'Report' to proceed.");
-        }, 1000);
-      } else {
-        alert("No group link available to report.");
-      }
-    } catch (error) {
-      console.error("Error reporting the Telegram link:", error);
-      alert("Failed to open the Telegram group.");
-    }
-  };
-
+    // const fetchUserDetails = async () => {
+    //   const details = await getCurrentUserDetailsFromDatabase();
+    //   setUserDetails(details);
+    // };
 
     // fetchUserDetails();
 
@@ -219,25 +171,25 @@ function Homepage() {
             {/* Displaying all the fetched links */}
             <div>
               <h2 className="text-lg font-bold">All Reported Links</h2>
-                <ul>
+              <ul>
                 {allLinks.map((item, index) => (
                   <li key={index}>
                     <p>{item?.link}</p>
-                    <Button onClick={ () => {
-                          if (!item?.link) {
-                              console.error('No link provided');
-                              return;
-                          }
-                  
-                          // Open the provided Telegram link in a new tab
-                          window.open(item?.link, '_blank');
-                  
-                          // Redirect to the upload page after a delay (e.g., 20 seconds)
-                          setTimeout(() => {
-                              router.push('/upload');
-                          }, 4000)
+                    <Button onClick={() => {
+                      if (!item?.link) {
+                        console.error('No link provided');
+                        return;
+                      }
+
+                      // Open the provided Telegram link in a new tab
+                      window.open(item?.link, '_blank');
+
+                      // Redirect to the upload page after a delay (e.g., 20 seconds)
+                      setTimeout(() => {
+                        router.push('/upload');
+                      }, 4000)
                     }
-                    
+
                     }>Report</Button>
                   </li>
                 ))}
