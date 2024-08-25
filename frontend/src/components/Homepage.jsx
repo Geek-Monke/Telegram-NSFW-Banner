@@ -27,44 +27,64 @@ function Homepage() {
         alert("Please enter a valid Telegram link in the correct format.");
         return;
       }
-
+  
       if (!userDetails || !userDetails.username) {
         alert("User details are not available. Please sign in again.");
         return;
       }
-
+  
       // Save the link and username to the telegramLinks collection
       await addDoc(collection(db, 'telegramLinks'), {
         link: link,
         username: userDetails.username,
       });
-
-      //api request to backend
+  
+      // API request to the backend
       const response = await axios.post('http://localhost:8080/api/check', { link });
       setResults(response.data);
-
-      console.log(results)
-
+  
+      console.log(results);
+  
       // Increment the user's points by 1
       const userRef = doc(db, 'users', userDetails.id);
       await updateDoc(userRef, {
         points: userDetails.points + 1,
       });
-
+  
       // Update the local state with the new points
       setUserDetails((prevDetails) => ({
         ...prevDetails,
         points: prevDetails.points + 1,
       }));
-
+  
       alert("Telegram link reported successfully!");
       setLink(''); // Clear the input after submission
+  
+      // Open the specific Telegram group in the web browser
+      const groupLink = results?.groupDetails?.link;
+      if (groupLink) {
+        const telegramWebUrl = groupLink;
+  
+        // Open the Telegram web client with the specific group
+        window.open(telegramWebUrl, '_blank');
+  
+        // Show instructions for reporting
+        setTimeout(() => {
+          alert("Once the group opens, click on the three dots in the top-right corner of the Telegram interface and select 'Report' to proceed.");
+        }, 1000);
+      }
+  
     } catch (error) {
       console.error("Error saving link to database:", error);
       alert("Failed to report the Telegram link.");
       console.error('Error checking the link:', error);
     }
   };
+  
+  
+
+  
+  
 
   // Function to get current user details from the database
   const getCurrentUserDetailsFromDatabase = async () => {
