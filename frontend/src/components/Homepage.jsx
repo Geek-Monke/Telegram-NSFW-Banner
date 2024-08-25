@@ -27,44 +27,75 @@ function Homepage() {
         alert("Please enter a valid Telegram link in the correct format.");
         return;
       }
-
+  
       if (!userDetails || !userDetails.username) {
         alert("User details are not available. Please sign in again.");
         return;
       }
-
+  
       // Save the link and username to the telegramLinks collection
       await addDoc(collection(db, 'telegramLinks'), {
         link: link,
         username: userDetails.username,
       });
-
-      //api request to backend
+  
+      // API request to the backend
       const response = await axios.post('http://localhost:8080/api/check', { link });
       setResults(response.data);
-
-      console.log(results)
-
+  
+      console.log(results);
+  
       // Increment the user's points by 1
       const userRef = doc(db, 'users', userDetails.id);
       await updateDoc(userRef, {
         points: userDetails.points + 1,
       });
-
+  
       // Update the local state with the new points
       setUserDetails((prevDetails) => ({
         ...prevDetails,
         points: prevDetails.points + 1,
       }));
-
+  
       alert("Telegram link reported successfully!");
       setLink(''); // Clear the input after submission
+  
+      // Open Telegram app or web
+      const groupLink = results.groupDetails.link;
+      if (groupLink) {
+        const telegramAppUrl = `tg://resolve?domain=${groupLink.replace('https://t.me/', '')}`;
+        const telegramWebUrl = `https://web.telegram.org/z/#${groupLink}`;
+  
+        // Try to open the Telegram app
+        let opened = false;
+        window.location.href = telegramAppUrl;
+  
+        // Check if Telegram app was opened; fallback to web if not
+        const timeout = setTimeout(() => {
+          if (!opened) {
+            window.open(telegramWebUrl, '_blank');
+          }
+        }, 500); // Adjust delay as needed
+  
+        window.addEventListener('blur', () => {
+          opened = true;
+          clearTimeout(timeout);
+        });
+  
+        // Instructions to guide the user to report
+        setTimeout(() => {
+          alert("Please manually report the group by clicking on the three dots in the top-right corner and selecting 'Report'.");
+        }, 1000);
+      }
+  
     } catch (error) {
       console.error("Error saving link to database:", error);
       alert("Failed to report the Telegram link.");
       console.error('Error checking the link:', error);
     }
   };
+  
+  
 
   // Function to get current user details from the database
   const getCurrentUserDetailsFromDatabase = async () => {
