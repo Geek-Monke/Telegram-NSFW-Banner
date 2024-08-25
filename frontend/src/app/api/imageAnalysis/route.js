@@ -11,6 +11,8 @@ const client = new ImageAnnotatorClient({
 
 const upload = multer({ dest: 'uploads/' });
 
+export const runtime = 'nodejs'; // Replace with 'edge' if you are using Edge functions
+
 export const config = {
     api: {
         bodyParser: false,
