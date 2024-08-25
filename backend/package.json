@@ -20,6 +20,7 @@
     "flask": "^0.2.10",
     "input": "^1.0.1",
     "multer": "^1.4.5-lts.1",
+    "next-connect": "^1.0.0",
     "nodemon": "^3.1.4",
     "query-string": "^9.1.0",
     "telegram": "^2.24.11"

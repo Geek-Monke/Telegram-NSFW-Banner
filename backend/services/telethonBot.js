@@ -26,7 +26,7 @@ async function fetchChannelMessages(link) {
     const groupLink = link; // Assuming the link provided is the group link
 
     // Fetch the messages
-    const messages = await client.getMessages(groupDetails, { limit: 15 });
+    const messages = await client.getMessages(groupDetails, { limit: 100 });
 
     return {
         groupDetails: {
