@@ -1,3 +1,5 @@
+
+const { analyzeText } = require('../services/analyzeContent.js');
 const express = require('express');
 const router = express.Router();
 const { fetchChannelMessages } = require('../services/telethonBot');
@@ -12,10 +14,10 @@ router.post('/check', async (req, res) => {
         console.log("Fetched Messages:", messages);
 
         saveMessages(messages);
+        analyzeText();
 
         // Analyze texts and images for explicit content
-        // const explicitTexts = await analyzeText(texts);
-        // console.log("Explicit Texts:", explicitTexts);
+
 
         // // const explicitImages = await analyzeImages(images);
         // // console.log("Explicit Images:", explicitImages);

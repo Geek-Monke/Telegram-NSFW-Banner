@@ -21,7 +21,7 @@ async function fetchChannelMessages(link) {
     console.log('Your session string:', client.session.save());
 
     const result = await client.getEntity(link);
-    const messages = await client.getMessages(result, { limit: 50 });
+    const messages = await client.getMessages(result, { limit: 15 });
 
     return messages;
 }
