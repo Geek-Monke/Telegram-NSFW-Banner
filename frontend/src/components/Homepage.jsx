@@ -43,6 +43,8 @@ function Homepage() {
       const response = await axios.post('http://localhost:8080/api/check', { link });
       setResults(response.data);
 
+      console.log(results)
+
       // Increment the user's points by 1
       const userRef = doc(db, 'users', userDetails.id);
       await updateDoc(userRef, {
@@ -126,7 +128,13 @@ function Homepage() {
               <Button onClick={saveLinkToDatabase}>Report</Button>
             </div>
 
-            {results && <div>{results}</div>}
+            {results &&
+              <div>
+                <h1>{results.groupDetails.name}</h1>
+                <h1>{results.groupDetails.link}</h1>
+                <h1>{results.messages.length}</h1>
+
+              </div>}
           </div>
         </div>
       </div>

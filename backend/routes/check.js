@@ -1,33 +1,22 @@
-
-const { analyzeText } = require('../services/analyzeContent.js');
 const express = require('express');
 const router = express.Router();
 const { fetchChannelMessages } = require('../services/telethonBot');
 const { saveMessages } = require('../services/fileHandler');
-// const { analyzeText, analyzeImages } = require('../services/analyzeContent');
 
 router.post('/check', async (req, res) => {
     try {
         const { link } = req.body;
 
-        const messages = await fetchChannelMessages(link);
-        console.log("Fetched Messages:", messages);
+        // Fetch group details and messages
+        const { groupDetails, messages } = await fetchChannelMessages(link);
+        console.log("Fetched Group Details:", groupDetails);
+        // console.log("Fetched Messages:", messages);
 
+        // Save the messages (if needed)
         saveMessages(messages);
-        analyzeText();
 
-        // Analyze texts and images for explicit content
-
-
-        // // const explicitImages = await analyzeImages(images);
-        // // console.log("Explicit Images:", explicitImages);
-
-        // // Send response based on analysis
-        // if (explicitTexts.length > 0) {
-        //     res.json({ status: 'explicit', details: { texts: explicitTexts } });
-        // } else {
-        //     res.json({ status: 'clean' });
-        // }
+        // Send the group details and messages to the frontend
+        res.json({ groupDetails, messages });
     } catch (error) {
         res.status(500).json({ error: 'An error occurred while processing the request.' });
     }

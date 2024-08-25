@@ -18,12 +18,24 @@ async function fetchChannelMessages(link) {
         onError: (err) => console.log(err),
     });
 
-    console.log('Your session string:', client.session.save());
+    // console.log('Your session string:', client.session.save());
 
-    const result = await client.getEntity(link);
-    const messages = await client.getMessages(result, { limit: 15 });
+    // Fetch the group/channel details
+    const groupDetails = await client.getEntity(link);
+    const groupName = groupDetails.title;
+    const groupLink = link; // Assuming the link provided is the group link
 
-    return messages;
+    // Fetch the messages
+    const messages = await client.getMessages(groupDetails, { limit: 15 });
+
+    return {
+        groupDetails: {
+            name: groupName,
+            link: groupLink,
+            totalMessageCount: groupDetails.participants_count // Total number of participants/messages
+        },
+        messages
+    };
 }
 
 module.exports = { fetchChannelMessages };
