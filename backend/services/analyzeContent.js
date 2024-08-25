@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const vision = require('@google-cloud/vision');
+const fetch = require('node-fetch');
 
 const visionClient = new vision.ImageAnnotatorClient();
 
@@ -11,7 +12,7 @@ const sightengineSecret = 'hvynp7cZYXfBkoEj2nGm6JJgtZvdSiKK';
 
 // Function to remove emojis and special characters
 const removeEmojisAndSpecialChars = (text) => {
-    const normalizedText = text.normalize('NFKD').replace(/[\u0300-\u036F]/g, '')
+    const normalizedText = text.normalize('NFKD').replace(/[\u0300-\u036F]/g, '');
     return normalizedText
         .replace(/[\u{1F600}-\u{1F64F}]/gu, '') // Remove emoticons
         .replace(/[\u{1F300}-\u{1F5FF}]/gu, '') // Remove symbols & pictographs
@@ -28,43 +29,52 @@ const removeEmojisAndSpecialChars = (text) => {
         .replace(/[\p{S}\p{P}]/gu, '')          // Remove all other symbols and punctuation
         .replace(/[\n\r]/g, ' ')                // Replace newlines with spaces
         .replace(/\s+/g, ' ')                   // Replace multiple spaces with a single space
-        .trim()                                      // Remove leading and trailing space
+        .trim()                                 // Remove leading and trailing space
         .slice(0, 300);
 };
 
+async function analyzeText() {
+    try {
+        const filePath = path.join(__dirname, '../data/text.txt');
+        const fileContent = fs.readFileSync(filePath, 'utf8');
 
-function analyzeText() {
-    const filePath = path.join(__dirname, '../data/text.txt');
-    const fileContent = fs.readFileSync(filePath, 'utf8');
+        const cleanedText = removeEmojisAndSpecialChars(fileContent);
+        console.log(cleanedText);
 
+        const url = `https://api.sightengine.com/1.0/text/check.json?text=${encodeURIComponent(cleanedText)}&lang=en&mode=standard&api_user=${sightengineUser}&api_secret=${sightengineSecret}`;
 
-    const cleanedText = removeEmojisAndSpecialChars(fileContent);
-    console.log(cleanedText);
+        const response = await fetch(url);
+        const data = await response.json();
 
-    const url = `https://api.sightengine.com/1.0/text/check.json?text=${encodeURIComponent(cleanedText)}&lang=en&mode=standard&api_user=${sightengineUser}&api_secret=${sightengineSecret}`;
+        if (data && data.profanity && data.profanity.matches.length > 0) {
+            const matches = data.profanity.matches;
+            let highOrMediumCount = 0;
 
-    fetch(url)
-        .then(response => response.json()) // Parse the JSON from the response
-        .then(data => {
-            // console.log('API Response:', data); // Log the entire response to inspect its structure
-            console.log(data.profanity);
-
-
-            if (data && data.offensive) {
-                const categories = data.offensive.categories;
-
-                if (categories.sexual > 0.5) {
-                    console.log('Sexual content detected');
-                } else {
-                    console.log('No sexual content detected');
+            // Count the number of matches with "high" or "medium" intensity
+            matches.forEach(match => {
+                if (match.intensity === 'high' || match.intensity === 'medium') {
+                    highOrMediumCount++;
                 }
+            });
+
+            let flag = false;
+            const majorityHighOrMedium = highOrMediumCount >= matches.length / 2;
+
+            if (majorityHighOrMedium) {
+                console.log('Flag set to true: High or medium intensity detected');
+                flag = true;
             } else {
-                console.error('Unexpected API response format.');
+                console.log('Flag set to false: No significant high or medium intensity detected');
             }
-        })
-        .catch(error => {
-            console.error('Error occurred:', error);
-        });
+            return flag;
+        } else {
+            console.log('No profanity detected.');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error occurred:', error);
+        throw error;
+    }
 }
 
 

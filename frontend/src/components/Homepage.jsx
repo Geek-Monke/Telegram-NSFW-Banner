@@ -148,13 +148,13 @@ function Homepage() {
               <Button onClick={saveLinkToDatabase}>Report</Button>
             </div>
 
-            {results &&
+            {results ?
               <div>
-                <h1>{results.groupDetails.name}</h1>
-                <h1>{results.groupDetails.link}</h1>
-                <h1>{results.messages.length}</h1>
+                <h1>{results?.groupDetails?.name}</h1>
+                <h1>{results?.groupDetails?.link}</h1>
+                <h1>{results?.messages?.length}</h1>
 
-              </div>}
+              </div>:<h1>no offensive content found</h1>}
           </div>
         </div>
       </div>
