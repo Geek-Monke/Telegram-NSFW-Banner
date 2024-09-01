@@ -71,7 +71,7 @@ function Homepage() {
       });
 
   
-      const response = await axios.post('https://telegram-nsfw-banner.vercel.app/api/check', { link });
+      const response = await axios.post('http://localhost:8080/api/check', { link });
       setResults(response.data);
       
       console.log(results);
@@ -125,15 +125,15 @@ function Homepage() {
   };
 
   useEffect(() => {
-    // getAllLinks();
+    getAllLinks();
 
-    // const fetchUserDetails = async () => {
-    //   const details = await getCurrentUserDetailsFromDatabase();
-    //   setUserDetails(details);
-    // };
+    const fetchUserDetails = async () => {
+      const details = await getCurrentUserDetailsFromDatabase();
+      setUserDetails(details);
+    };
 
-    // fetchUserDetails();
-
+    fetchUserDetails();
+    // getCurrentUserDetailsFromDatabase()
     getAllLinks()
   }, []);
 
@@ -150,7 +150,7 @@ function Homepage() {
           {userDetails?.points > 0 ? <p className='text-yellow-400'><span>{userDetails?.points}</span> Points</p> : <p>0 Points</p>}
         </div>
       </div>
-      <div className='min-h-screen w-full flex flex-col justify-center items-center'>
+      <div className='min-h-screen mt-20 w-full flex flex-col justify-center items-center'>
         <h1 className='text-[3rem] text-center'>Welcome to <span className='text-red-600'>Adult</span> Content Blocker</h1>
 
         <div className='max-w-xs w-full mt-16'>
@@ -162,20 +162,20 @@ function Homepage() {
 
             {results &&
               <div>
-                <h1>{results.groupDetails.name}</h1>
-                <h1>{results.groupDetails.link}</h1>
+                <h1>{results.groupDetails?.name}</h1>
+                <h1>{results.groupDetails?.link}</h1>
 
-                <Button>Report</Button>
+                <Button onClick={saveLinkToDatabase}>Check</Button>
               </div>}
 
             {/* Displaying all the fetched links */}
-            <div>
-              <h2 className="text-lg font-bold">All Reported Links</h2>
+            <div className=''>
+              <h2 className="text-4xl mt-14 text-center font-bold">All Reported <span className='text-red-700 font-bold'>Links</span></h2>
                 <ul>
                 {allLinks.map((item, index) => (
-                  <li key={index}>
-                    <p>{item?.link}</p>
-                    <Button onClick={ () => {
+                  <li key={index} className='flex gap-6 py-3 float-start justify-between w-full items-center'>
+                    <p className='text-gray-200 text-[15px]'>{item?.link}</p>
+                    <Button className='text-[13px] py-0 px-3 bg-red-400 hover:bg-red-500 ' onClick={ () => {
                           if (!item?.link) {
                               console.error('No link provided');
                               return;
