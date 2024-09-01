@@ -1,7 +1,7 @@
 import UploadScreenshot from "../../components/UploadScreenshot";
 
-export default function Uploadsss(){
-    return(
-        <UploadScreenshot/>
+export default function Uploadsss() {
+    return (
+        <UploadScreenshot />
     )
 }

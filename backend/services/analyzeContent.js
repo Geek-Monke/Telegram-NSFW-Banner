@@ -1,14 +1,14 @@
+require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const vision = require('@google-cloud/vision');
 const fetch = require('node-fetch');
 
-const visionClient = new vision.ImageAnnotatorClient();
 
 process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(__dirname, '../notional-fusion-428301-s9-bfc944d1eb09.json');
 
-const sightengineUser = '988185572';
-const sightengineSecret = 'hvynp7cZYXfBkoEj2nGm6JJgtZvdSiKK';
+const sightengineUser = process.env.sightengineUser;
+const sightengineSecret = process.env.sightengineSecret;
 
 // Function to remove emojis and special characters
 const removeEmojisAndSpecialChars = (text) => {

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState } from 'react';
 import axios from 'axios';
@@ -24,7 +24,11 @@ const UploadScreenshot = () => {
         event.preventDefault();
 
         if (!selectedFile) {
+<<<<<<< HEAD
             setMessage('Please select a file to upload.');
+=======
+            setMessage('Please select a file before uploading.');
+>>>>>>> 86f6172d4d8f73035dddba90f13dc2d16e7a0f72
             return;
         }
 
@@ -32,7 +36,7 @@ const UploadScreenshot = () => {
         formData.append('screenshot', selectedFile);
 
         try {
-            const response = await axios.post('/upload', formData, {
+            const response = await axios.post('/api/imageAnalysis', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

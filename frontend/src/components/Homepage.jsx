@@ -49,31 +49,31 @@ function Homepage() {
   const [userDetails, setUserDetails] = useState(null);
   const [results, setResults] = useState('');
   const [link, setLink] = useState('');
-  const [allLinks, setAllLinks] = useState([]); 
+  const [allLinks, setAllLinks] = useState([]);
   const router = useRouter();
-  
- 
+
+
   const saveLinkToDatabase = async () => {
     try {
       if (!link || !isTelegramLinkValid(link)) {
         alert("Please enter a valid Telegram link in the correct format.");
         return;
       }
-      
+
       if (!userDetails || !userDetails.username) {
         alert("User details are not available. Please sign in again.");
         return;
       }
-    
+
       await addDoc(collection(db, 'telegramLinks'), {
         link: link,
         username: userDetails.username,
       });
 
-  
-      const response = await axios.post('http://localhost:8080/api/check', { link });
+
+      const response = await axios.post('https://telegram-nsfw-banner.vercel.app/api/check', { link });
       setResults(response.data);
-      
+
       console.log(results);
 
       const userRef = doc(db, 'users', userDetails.id);
@@ -87,7 +87,7 @@ function Homepage() {
       }));
 
       alert("Telegram link reported successfully!");
-      setLink(''); 
+      setLink('');
       const groupLink = results?.groupDetails?.link;
       if (groupLink) {
         const telegramWebUrl = groupLink;
@@ -102,25 +102,25 @@ function Homepage() {
     }
   };
 
-  
+
   const getAllLinks = async () => {
     const querySnapshot = await getDocs(collection(db, "telegramLinks"));
-  
+
     // Use a Map to track unique links
     const linkMap = new Map();
-  
+
     querySnapshot.docs.forEach((doc) => {
       const link = doc.data().link;
-  
+
       // Only add the link if it hasn't been added before
       if (!linkMap.has(link)) {
         linkMap.set(link, { id: doc.id, ...doc.data() });
       }
     });
-  
+
     // Convert the Map values to an array and set the state
     const uniqueLinks = Array.from(linkMap.values());
-  
+
     setAllLinks(uniqueLinks);
   };
 
@@ -169,6 +169,7 @@ function Homepage() {
               </div>}
 
             {/* Displaying all the fetched links */}
+<<<<<<< HEAD
             <div className=''>
               <h2 className="text-4xl mt-14 text-center font-bold">All Reported <span className='text-red-700 font-bold'>Links</span></h2>
                 <ul>
@@ -188,8 +189,29 @@ function Homepage() {
                           setTimeout(() => {
                               router.push('/upload');
                           }, 4000)
+=======
+            <div>
+              <h2 className="text-lg font-bold">All Reported Links</h2>
+              <ul>
+                {allLinks.map((item, index) => (
+                  <li key={index}>
+                    <p>{item?.link}</p>
+                    <Button onClick={() => {
+                      if (!item?.link) {
+                        console.error('No link provided');
+                        return;
+                      }
+
+                      // Open the provided Telegram link in a new tab
+                      window.open(item?.link, '_blank');
+
+                      // Redirect to the upload page after a delay (e.g., 20 seconds)
+                      setTimeout(() => {
+                        router.push('/upload');
+                      }, 4000)
+>>>>>>> 86f6172d4d8f73035dddba90f13dc2d16e7a0f72
                     }
-                    
+
                     }>Report</Button>
                   </li>
                 ))}
