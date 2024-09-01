@@ -24,11 +24,8 @@ const UploadScreenshot = () => {
         event.preventDefault();
 
         if (!selectedFile) {
-<<<<<<< HEAD
-            setMessage('Please select a file to upload.');
-=======
+
             setMessage('Please select a file before uploading.');
->>>>>>> 86f6172d4d8f73035dddba90f13dc2d16e7a0f72
             return;
         }
 
