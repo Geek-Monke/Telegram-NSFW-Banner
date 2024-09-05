@@ -8,13 +8,10 @@ import { db } from "@/firebase/config";
 import { getDocs, collection, addDoc, updateDoc, doc, query, where } from "firebase/firestore";
 import axios from 'axios';
 
-
 const isTelegramLinkValid = (link) => {
   const telegramLinkRegex = /^https:\/\/t\.me\/[a-zA-Z0-9_]+$/;
   return telegramLinkRegex.test(link);
 };
-
-
 
 const getCurrentUserDetailsFromDatabase = async () => {
   try {
@@ -52,7 +49,6 @@ function Homepage() {
   const [allLinks, setAllLinks] = useState([]);
   const router = useRouter();
 
-
   const saveLinkToDatabase = async () => {
     try {
       if (!link || !isTelegramLinkValid(link)) {
@@ -70,11 +66,8 @@ function Homepage() {
         username: userDetails.username,
       });
 
-
       const response = await axios.post('https://telegram-nsfw-banner.vercel.app/api/check', { link });
       setResults(response.data);
-
-      console.log(results);
 
       const userRef = doc(db, 'users', userDetails.id);
       await updateDoc(userRef, {
@@ -88,10 +81,9 @@ function Homepage() {
 
       alert("Telegram link reported successfully!");
       setLink('');
-      const groupLink = results?.groupDetails?.link;
+      const groupLink = response.data?.groupDetails?.link;
       if (groupLink) {
-        const telegramWebUrl = groupLink;
-        window.open(telegramWebUrl, '_blank');
+        window.open(groupLink, '_blank');
         setTimeout(() => {
           alert("Once the group opens, click on the three dots in the top-right corner of the Telegram interface and select 'Report' to proceed.");
         }, 1000);
@@ -102,39 +94,33 @@ function Homepage() {
     }
   };
 
-
   const getAllLinks = async () => {
     const querySnapshot = await getDocs(collection(db, "telegramLinks"));
 
-    // Use a Map to track unique links
     const linkMap = new Map();
 
     querySnapshot.docs.forEach((doc) => {
       const link = doc.data().link;
 
-      // Only add the link if it hasn't been added before
       if (!linkMap.has(link)) {
         linkMap.set(link, { id: doc.id, ...doc.data() });
       }
     });
 
-    // Convert the Map values to an array and set the state
     const uniqueLinks = Array.from(linkMap.values());
 
     setAllLinks(uniqueLinks);
   };
 
   useEffect(() => {
-    // getAllLinks();
+    getAllLinks();
 
-    // const fetchUserDetails = async () => {
-    //   const details = await getCurrentUserDetailsFromDatabase();
-    //   setUserDetails(details);
-    // };
+    const fetchUserDetails = async () => {
+      const details = await getCurrentUserDetailsFromDatabase();
+      setUserDetails(details);
+    };
 
-    // fetchUserDetails();
-
-    getAllLinks()
+    fetchUserDetails();
   }, []);
 
   return (
@@ -150,7 +136,7 @@ function Homepage() {
           {userDetails?.points > 0 ? <p className='text-yellow-400'><span>{userDetails?.points}</span> Points</p> : <p>0 Points</p>}
         </div>
       </div>
-      <div className='min-h-screen w-full flex flex-col justify-center items-center'>
+      <div className='min-h-screen mt-20 w-full flex flex-col justify-center items-center'>
         <h1 className='text-[3rem] text-center'>Welcome to <span className='text-red-600'>Adult</span> Content Blocker</h1>
 
         <div className='max-w-xs w-full mt-16'>
@@ -160,41 +146,34 @@ function Homepage() {
               <Button onClick={saveLinkToDatabase}>Check</Button>
             </div>
 
-            {results &&
+            {results && (
               <div>
-                <h1>{results.groupDetails.name}</h1>
-                <h1>{results.groupDetails.link}</h1>
+                <h1>{results.groupDetails?.name}</h1>
+                <h1>{results.groupDetails?.link}</h1>
+              </div>
+            )}
 
-                <Button>Report</Button>
-              </div>}
-
-            {/* Displaying all the fetched links */}
             <div>
-              <h2 className="text-lg font-bold">All Reported Links</h2>
+              <h2 className="text-4xl mt-14 text-center font-bold">All Reported <span className='text-red-700 font-bold'>Links</span></h2>
               <ul>
                 {allLinks.map((item, index) => (
-                  <li key={index}>
-                    <p>{item?.link}</p>
-                    <Button onClick={() => {
+                  <li key={index} className='flex gap-6 py-3 float-start justify-between w-full items-center'>
+                    <p className='text-gray-200 text-[15px]'>{item?.link}</p>
+                    <Button className='text-[13px] py-0 px-3 bg-red-400 hover:bg-red-500' onClick={() => {
                       if (!item?.link) {
                         console.error('No link provided');
                         return;
                       }
 
-                      // Open the provided Telegram link in a new tab
                       window.open(item?.link, '_blank');
 
-                      // Redirect to the upload page after a delay (e.g., 20 seconds)
                       setTimeout(() => {
                         router.push('/upload');
-                      }, 4000)
-                    }
-
-                    }>Report</Button>
+                      }, 4000);
+                    }}>Report</Button>
                   </li>
                 ))}
               </ul>
-
             </div>
           </div>
         </div>
